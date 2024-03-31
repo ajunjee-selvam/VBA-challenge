@@ -1,108 +1,111 @@
 Sub stockinfo()
-    'The above function is used to return the ticker symbol, yearly price change, % price change, and stock volume for each individual stock symbol
-    ' in each of the worksheets. Additionally, the great % increase and decrease, as well as the greatest total volume are extracted from each worksheet
     
-    
-    'to loop through each worksheet in the Excel
-    For Each ws In Worksheets
-        'declaration statements
-        Dim j As Integer
-        Dim startingprice As Double
-        Dim endingprice As Double
-        
-        'adding headings to each of the worksheets
-        ws.Cells(1, 10).Value = "Ticker Symbol"
-        ws.Cells(1, 11).Value = "Starting Opening Price"
-        ws.Cells(1, 12).Value = "Ending Closing Price"
-        ws.Cells(1, 13).Value = "Yearly Change ($)"
-        ws.Cells(1, 14).Value = "Yearly Change (%)"
-        ws.Cells(1, 15).Value = "Total Volume"
-        ws.Cells(1, 17).Value = "Metric"
-        ws.Cells(2, 17).Value = "Greatest % Increase"
-        ws.Cells(3, 17).Value = "Greatest % Decrease"
-        ws.Cells(4, 17).Value = "Greatest Total Volume"
-        ws.Cells(1, 18).Value = "Ticker Symbol"
-        ws.Cells(1, 19).Value = "Value"
-        
-        'for determing the last row in the stock data
-        lastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
-        
-        'for listing out the individual stocks from the data
-        j = 2
-        
-        'looks through the data and returns the list of stocks to be summarized
-        For i = 2 To lastRow
-            If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
-                ws.Cells(j, 10).Value = ws.Cells(i, 1).Value
-                j = j + 1
-            End If
-        Next i
-        
-        'for determing the row number of the last stock to be summarized based on the extracted stock list
-        lastRowList = ws.Cells(Rows.Count, 10).End(xlUp).Row
-        
-        'looking through the extracted stock list
-        For x = 2 To lastRowList
-            'initializing the total stock volume as 0
+    'To loop through each worksheet in the Excel
+    Dim ws As Worksheet
+        For Each ws In ActiveWorkbook.Worksheets
+        ws.Activate
+            
+            'For looping through each row of stock data
+            Dim i As Long
+            'For looping through the summary list to find the required metrics
+            Dim j As Long
+            'For identifying the row number and cell number to be pulled or populated
+            Dim row As Integer
+            row = 2
+            Dim column As Integer
+            column = 1
+            
+            'For determing the last row in the stock data
+            Dim lastRow As Long
+            lastRow = ws.Cells(Rows.Count, 1).End(xlUp).row
+            'For determing the last row of the summary list
+            Dim lastRowList As Long
+            
+            'Remaining declaration statements for the stock data metrics
+            Dim ticker As String
+            Dim startingprice As Double
+            Dim endingprice As Double
+            Dim yearlychange As Double
+            Dim percentchange As Double
+            Dim totalvolume As Double
             totalvolume = 0
-            'looping through the stock data
+            Dim maxvolume As Double
+            maxvolume = 0
+            Dim maxinc As Double
+            maxinc = 0
+            Dim maxdec As Double
+            maxdec = 0
+            
+            'Adding headings to the worksheet
+            ws.Cells(1, 9).Value = "Ticker Symbol"
+            ws.Cells(1, 10).Value = "Yearly Change ($)"
+            ws.Cells(1, 11).Value = "Yearly Change (%)"
+            ws.Cells(1, 12).Value = "Total Volume"
+            ws.Cells(2, 15).Value = "Greatest % Increase"
+            ws.Cells(3, 15).Value = "Greatest % Decrease"
+            ws.Cells(4, 15).Value = "Greatest Total Volume"
+            ws.Cells(1, 16).Value = "Ticker Symbol"
+            ws.Cells(1, 17).Value = "Value"
+            
+            'Set the initial ticker symbol and its starting price
+            ticker = Cells(row, column).Value
+            startingprice = Cells(row, column + 2).Value
+             
+            'For looping through the entire stock data
             For i = 2 To lastRow
-                
-                'if the stock name in the data matches the stock in the list, then add up the volume
-                If ws.Cells(i, 1).Value = ws.Cells(x, 10).Value Then
-                    totalvolume = totalvolume + ws.Cells(i, 7).Value
+                'If the ticker symbol in the next row is different, pull the end-of-year values and calculate the yearly changes
+                If Cells(i + 1, column).Value <> Cells(i, column).Value Then
+                    'Set the ticker symbol for the summary row
+                    ticker = Cells(i, column).Value
+                    Cells(row, column + 8).Value = ticker
+                    'Set the ending price for the ticker
+                    endingprice = Cells(i, column + 5).Value
+                    'Calculate yearly change and populate the summary row
+                    yearlychange = endingprice - startingprice
+                    Cells(row, column + 9).Value = yearlychange
+                    'Calculate percentage change based on yearly change and starting price and format as percentage
+                    percentchange = yearlychange / startingprice
+                    Cells(row, column + 10).Value = percentchange
+                    Cells(row, column + 10).NumberFormat = "0.00%"
+                    'Determine total stock volume and convert from scientific notation
+                    totalvolume = totalvolume + Cells(i, column + 6).Value
+                    Cells(row, column + 11).Value = totalvolume
+                    Cells(row, column + 11).NumberFormat = "0"
+                    'Change row count to prepare for next summary row
+                    row = row + 1
+                    'Reset starting price for the next ticker
+                    startingprice = Cells(i + 1, column + 2)
+                    'Reset total volume for the next ticker
+                    totalvolume = 0
+                'If the cell is still the same ticker, add up the stock volume
+                Else
+                    totalvolume = totalvolume + Cells(i, column + 6).Value
                 End If
-                
-                'if the stock name in the data matches the stock in the list and the previous row contains a different stock, set the starting price using this row
-                If ws.Cells(i, 1).Value = ws.Cells(x, 10).Value And ws.Cells(i - 1, 1).Value <> ws.Cells(x, 10).Value Then
-                    startingprice = ws.Cells(i, 3).Value
-                    ws.Cells(x, 11).Value = startingprice
-                End If
-                
-                'if the stock name in the data matches the stock in the list and the next row contains a different stock, set the ending price using this row
-                If ws.Cells(i, 1).Value = ws.Cells(x, 10).Value And ws.Cells(i + 1, 1).Value <> ws.Cells(x, 10).Value Then
-                    endingprice = ws.Cells(i, 6).Value
-                    ws.Cells(x, 12).Value = endingprice
-                End If
-    
             Next i
-            'return the total volume calculated from the previous loop
-            ws.Cells(x, 15).Value = totalvolume
-            'calculate the yearly difference and return the value in a cell
-            ws.Cells(x, 13).Value = ws.Cells(x, 12).Value - ws.Cells(x, 11).Value
-            'calculate the % yearly difference, format as a percentage, and return the value in a cell
-            ws.Cells(x, 14).Value = Format((ws.Cells(x, 13).Value / ws.Cells(x, 11).Value), "Percent")
-        
-        Next x
-        
-        
-        'initializing the values of the 3 metrics below
-        maxvolume = 0
-        maxinc = 0
-        maxdec = 0
-        'interating throw the stock list summary again
-        For k = 2 To lastRowList
-            'if the max volume of the current cell is greater than the existing maxvolume value, update the maxvolume to the current cell
-            If ws.Cells(k, 15).Value > maxvolume Then
-                maxvolume = ws.Cells(k, 15).Value
-                ws.Cells(4, 19).Value = maxvolume
-                ws.Cells(4, 18).Value = ws.Cells(k, 10).Value
-            End If
             
-            'if the max increase of the current cell is greater than the existing maxinc value, update the maxinc to the current cell
-            If ws.Cells(k, 14).Value > maxinc Then
-                maxinc = ws.Cells(k, 14).Value
-                ws.Cells(2, 19).Value = Format(maxinc, "Percent")
-                ws.Cells(2, 18).Value = ws.Cells(k, 10).Value
-            End If
             
-            'if the max decrease of the current cell is lower than the existing maxdec value, update the maxdec to the current cell
-            If ws.Cells(k, 14).Value < maxdec Then
-                maxdec = ws.Cells(k, 14).Value
-                ws.Cells(3, 19).Value = Format(maxdec, "Percent")
-                ws.Cells(3, 18).Value = ws.Cells(k, 10).Value
-            End If
-        Next k
-        
+            'Determine the last row of the summary list
+            lastRowList = ws.Cells(Rows.Count, column + 8).End(xlUp).row
+            'Loop through the summary list to find the max and min change, max volume, and their associated ticker symbols
+            For j = 2 To lastRowList
+                'Max change and its ticker
+                If Cells(j, column + 10).Value = Application.WorksheetFunction.Max(ws.Range("K2:K" & lastRowList)) Then
+                    Cells(2, column + 15).Value = Cells(j, column + 8).Value
+                    Cells(2, column + 16).Value = Cells(j, column + 10).Value
+                    Cells(2, column + 16).NumberFormat = "0.00%"
+                'Min change and its ticker
+                ElseIf Cells(j, column + 10).Value = Application.WorksheetFunction.Min(ws.Range("K2:K" & lastRowList)) Then
+                    Cells(3, column + 15).Value = Cells(j, column + 8).Value
+                    Cells(3, column + 16).Value = Cells(j, column + 10).Value
+                    Cells(3, column + 16).NumberFormat = "0.00%"
+                'Max volume and its ticker
+                ElseIf Cells(j, column + 11).Value = Application.WorksheetFunction.Max(ws.Range("L2:L" & lastRowList)) Then
+                    Cells(4, column + 15).Value = Cells(j, column + 8).Value
+                    Cells(4, column + 16).Value = Cells(j, column + 11).Value
+                    Cells(4, column + 16).NumberFormat = "0"
+                End If
+            Next j
+    'Move to next worksheet to run the above code again
     Next ws
+            
 End Sub

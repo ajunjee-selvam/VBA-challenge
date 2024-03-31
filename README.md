@@ -1,6 +1,8 @@
 # VBA-challenge
-Module 2 Assignment Files
+This project involves the use of VBA scripting to analyze generated stock market data. 
 
-This repository contains the relevant files for the VBA Assignment from Module 2, which includes the VBA script code called "VBA Code" saved as a VB file. 
+In this repo, you will find the following files:
+- VBA Code: this is the VBA code used to conduct the stock market data analysis
+- Multiple_year_stock_data: this is the macro-enabled file containined the generated stock data with the 'VBA Code' script already executed
+- Images Folder: this folder contains the output for each year after running the 'VBA Code' file in the 'Multiple_year_stock_data' Excel Workbook
 
-The images folder includes evidence that the code worked with the excel file, labelled from A-F to present each sheet in the Excel workbook. 
